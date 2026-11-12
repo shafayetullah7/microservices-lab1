@@ -8,7 +8,8 @@
   "include": [
     "src/**/*",
     "../../libs/app-env/src/**/*",
-    "../../libs/database-health/src/**/*"
+    "../../libs/database-health/src/**/*",
+    "../../libs/database-readiness/src/**/*"
   ],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }

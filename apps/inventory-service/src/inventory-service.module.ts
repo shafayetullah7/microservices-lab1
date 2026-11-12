@@ -9,6 +9,7 @@ import {
 } from '../../../libs/app-env/src/index.js';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { HealthModule } from '../../../libs/database-health/src/index.js';
+import { DatabaseReadinessModule } from '../../../libs/database-readiness/src/index.js';
 import { relations } from './db/relations.js';
 import { InventoryServiceController } from './inventory-service.controller.js';
 import { InventoryServiceService } from './inventory-service.service.js';
@@ -17,6 +18,13 @@ import { InventoryServiceService } from './inventory-service.service.js';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AppEnvModule.forRoot(inventoryEnvSchema),
+    DatabaseReadinessModule.forRootAsync({
+      inject: [AppEnvService],
+      useFactory: (appEnv: AppEnvService<InventoryEnv>) => ({
+        connectionString: appEnv.get('INVENTORY_DATABASE_URL'),
+        label: 'inventory database',
+      }),
+    }),
     DrizzleModule.forRootAsync({
       inject: [AppEnvService],
       useFactory: (appEnv: AppEnvService<InventoryEnv>) => ({
