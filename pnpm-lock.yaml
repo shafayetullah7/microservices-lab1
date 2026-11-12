@@ -19,13 +19,13 @@ importers:
         version: 12.4.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/platform-express@12.4.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/drizzle':
         specifier: ^0.0.2
-        version: 0.0.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.4.2)(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1))(reflect-metadata@0.2.2)
+        version: 0.0.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.4.2)(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7))(reflect-metadata@0.2.2)
       '@nestjs/platform-express':
         specifier: ^12.0.1
         version: 12.4.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.4.2)(rxjs@7.8.2)(supports-color@7.2.0)
       drizzle-orm:
         specifier: ^1.0.0-rc.5
-        version: 1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)
+        version: 1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7)
       pg:
         specifier: ^8.23.1
         version: 8.23.1
@@ -35,6 +35,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@nestjs/cli':
         specifier: ^12.0.0
@@ -68,7 +71,7 @@ importers:
         version: 4.1.12(vitest@4.1.12)
       drizzle-kit:
         specifier: ^1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1))
+        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7))
       fork-ts-checker-webpack-plugin:
         specifier: ^9.1.0
         version: 9.1.0(typescript@6.0.3)(webpack@5.112.2(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32))
@@ -2791,6 +2794,9 @@ packages:
     resolution: {integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==}
     engines: {node: '>=18'}
 
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+
 snapshots:
 
   '@angular-devkit/core@22.2.6(chokidar@5.0.0)':
@@ -3169,11 +3175,11 @@ snapshots:
     optionalDependencies:
       '@nestjs/platform-express': 12.4.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.4.2)(rxjs@7.8.2)(supports-color@7.2.0)
 
-  '@nestjs/drizzle@0.0.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.4.2)(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1))(reflect-metadata@0.2.2)':
+  '@nestjs/drizzle@0.0.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.4.2)(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7))(reflect-metadata@0.2.2)':
     dependencies:
       '@nestjs/common': 12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0)
       '@nestjs/core': 12.4.2(@nestjs/common@12.4.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/platform-express@12.4.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      drizzle-orm: 1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)
+      drizzle-orm: 1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7)
       reflect-metadata: 0.2.2
 
   '@nestjs/mau@0.2.9':
@@ -3918,14 +3924,15 @@ snapshots:
 
   dotenv@18.0.3: {}
 
-  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)):
+  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7)):
     optionalDependencies:
-      drizzle-orm: 1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)
+      drizzle-orm: 1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7)
 
-  drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1):
+  drizzle-orm@1.0.0-rc.5(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7):
     optionalDependencies:
       '@types/pg': 8.23.1
       pg: 8.23.1
+      zod: 4.6.7
 
   dunder-proto@1.0.1:
     dependencies:
@@ -5086,3 +5093,5 @@ snapshots:
   xtend@4.0.2: {}
 
   yoctocolors@2.2.0: {}
+
+  zod@4.6.7: {}

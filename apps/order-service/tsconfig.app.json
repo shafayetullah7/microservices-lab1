@@ -5,6 +5,6 @@
     "rootDir": "../..",
     "outDir": "../../dist/apps/order-service"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../libs/app-env/src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }

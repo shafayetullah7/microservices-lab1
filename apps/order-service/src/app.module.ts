@@ -1,6 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { DrizzleModule } from '@nestjs/drizzle';
+import {
+  AppEnvModule,
+  AppEnvService,
+  orderEnvSchema,
+  type OrderEnv,
+} from '../../../libs/app-env/src/index.js';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -9,12 +15,16 @@ import { relations } from './db/relations.js';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AppEnvModule.forRoot(orderEnvSchema),
     DrizzleModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [AppEnvService],
+      useFactory: (appEnv: AppEnvService<OrderEnv>) => ({
         drizzle,
-        connection: config.getOrThrow<string>('ORDER_DATABASE_URL'),
+        connection: {
+          connectionString: appEnv.get('ORDER_DATABASE_URL'),
+          max: 10,
+          idleTimeoutMillis: 30_000,
+        },
         relations,
       }),
     }),
