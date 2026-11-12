@@ -13,8 +13,6 @@ import { DatabaseReadinessModule } from '../../../libs/database-readiness/src/in
 import { DatabaseModule } from './database/database.module.js';
 import { relations } from './db/relations.js';
 import { InventoryModule } from './inventory/inventory.module.js';
-import { InventoryServiceController } from './inventory-service.controller.js';
-import { InventoryServiceService } from './inventory-service.service.js';
 
 @Module({
   imports: [
@@ -43,7 +41,5 @@ import { InventoryServiceService } from './inventory-service.service.js';
     DatabaseModule,
     InventoryModule,
   ],
-  controllers: [InventoryServiceController],
-  providers: [InventoryServiceService],
 })
 export class InventoryServiceModule {}

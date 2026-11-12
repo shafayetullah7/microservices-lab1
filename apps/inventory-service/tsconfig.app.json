@@ -9,7 +9,8 @@
     "src/**/*",
     "../../libs/app-env/src/**/*",
     "../../libs/database-health/src/**/*",
-    "../../libs/database-readiness/src/**/*"
+    "../../libs/database-readiness/src/**/*",
+    "../../libs/http/src/**/*"
   ],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }
