@@ -10,7 +10,9 @@ import {
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { HealthModule } from '../../../libs/database-health/src/index.js';
 import { DatabaseReadinessModule } from '../../../libs/database-readiness/src/index.js';
+import { DatabaseModule } from './database/database.module.js';
 import { relations } from './db/relations.js';
+import { InventoryModule } from './inventory/inventory.module.js';
 import { InventoryServiceController } from './inventory-service.controller.js';
 import { InventoryServiceService } from './inventory-service.service.js';
 
@@ -38,6 +40,8 @@ import { InventoryServiceService } from './inventory-service.service.js';
       }),
     }),
     HealthModule,
+    DatabaseModule,
+    InventoryModule,
   ],
   controllers: [InventoryServiceController],
   providers: [InventoryServiceService],
