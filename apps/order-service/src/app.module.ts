@@ -10,6 +10,7 @@ import {
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { HealthModule } from '../../../libs/database-health/src/index.js';
 import { relations } from './db/relations.js';
 
 @Module({
@@ -28,6 +29,7 @@ import { relations } from './db/relations.js';
         relations,
       }),
     }),
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

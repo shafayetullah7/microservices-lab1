@@ -5,6 +5,10 @@
     "rootDir": "../..",
     "outDir": "../../dist/apps/inventory-service"
   },
-  "include": ["src/**/*", "../../libs/app-env/src/**/*"],
+  "include": [
+    "src/**/*",
+    "../../libs/app-env/src/**/*",
+    "../../libs/database-health/src/**/*"
+  ],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }

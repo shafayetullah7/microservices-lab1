@@ -8,6 +8,7 @@ import {
   type InventoryEnv,
 } from '../../../libs/app-env/src/index.js';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { HealthModule } from '../../../libs/database-health/src/index.js';
 import { relations } from './db/relations.js';
 import { InventoryServiceController } from './inventory-service.controller.js';
 import { InventoryServiceService } from './inventory-service.service.js';
@@ -28,6 +29,7 @@ import { InventoryServiceService } from './inventory-service.service.js';
         relations,
       }),
     }),
+    HealthModule,
   ],
   controllers: [InventoryServiceController],
   providers: [InventoryServiceService],
