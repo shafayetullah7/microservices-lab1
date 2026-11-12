@@ -1,0 +1,2 @@
+ALTER TABLE "orders" ALTER COLUMN "status" SET DEFAULT 'PENDING';--> statement-breakpoint
+ALTER TABLE "orders" DROP CONSTRAINT "orders_status_check", ADD CONSTRAINT "orders_status_check" CHECK ("status" in ('PENDING', 'RESERVED', 'REJECTED'));

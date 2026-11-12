@@ -8,11 +8,11 @@ import {
   type OrderEnv,
 } from '../../../libs/app-env/src/index.js';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
 import { HealthModule } from '../../../libs/database-health/src/index.js';
 import { DatabaseReadinessModule } from '../../../libs/database-readiness/src/index.js';
+import { DatabaseModule } from './database/database.module.js';
 import { relations } from './db/relations.js';
+import { OrdersModule } from './orders/orders.module.js';
 
 @Module({
   imports: [
@@ -38,8 +38,8 @@ import { relations } from './db/relations.js';
       }),
     }),
     HealthModule,
+    DatabaseModule,
+    OrdersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

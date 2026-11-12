@@ -1,0 +1,63 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "b75959a5-f2a4-4dea-82bb-a6cf14cc1412",
+  "prevIds": [
+    "c027c27e-051c-40f5-afa8-e286474adedd"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "orders",
+        "status"
+      ],
+      "writes": [
+        "s|colprop|public.orders.status.default"
+      ],
+      "reads": [
+        "n|tbl|public.orders",
+        "n|sch|public",
+        "n|col|public.orders.status"
+      ],
+      "sqlHash": "2e8acffb780b748a"
+    },
+    {
+      "statementType": "alter_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "orders"
+      ],
+      "writes": [
+        "s|ck|public.orders.orders_status_check"
+      ],
+      "reads": [
+        "n|tbl|public.orders",
+        "n|sch|public",
+        "n|col|public.orders.status",
+        "e|col|public.orders.status"
+      ],
+      "sqlHash": "5d9ae8fb74693ecd"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"orders\",\"status\"]",
+      "set": {
+        "default": "'PENDING'"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "checks\u0000[\"public\",\"orders\",\"orders_status_check\"]",
+      "set": {
+        "value": "\"status\" in ('PENDING', 'RESERVED', 'REJECTED')"
+      }
+    }
+  ]
+}
