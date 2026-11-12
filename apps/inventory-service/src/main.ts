@@ -7,6 +7,7 @@ import { InventoryServiceModule } from './inventory-service.module.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(InventoryServiceModule);
+  app.enableShutdownHooks();
   const appEnv = app.get(AppEnvService<InventoryEnv>);
   await app.listen(appEnv.get('PORT'));
 }
