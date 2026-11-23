@@ -25,6 +25,10 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+**Lab docs:** [Day 3 Step 5 — distributed failure experiments](docs/day3-step5-distributed-failures.md) (HTTP timeouts, PENDING orders, reconcile).
+
+**Swagger UI** (after `pnpm start:inventory` / `pnpm start:order`): Inventory [http://127.0.0.1:3000/api](http://127.0.0.1:3000/api), Order [http://127.0.0.1:3001/api](http://127.0.0.1:3001/api). OpenAPI JSON at `/api-json`. Set `SWAGGER_ENABLED=false` to disable.
+
 ## Project setup
 
 ```bash

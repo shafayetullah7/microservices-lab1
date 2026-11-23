@@ -26,7 +26,7 @@ describe('Order ↔ Inventory integration (e2e)', () => {
       imports: [InventoryServiceModule],
     }).compile();
     inventoryApp = inventoryModule.createNestApplication();
-    setupHttp(inventoryApp);
+    setupHttp(inventoryApp, { serviceName: 'InventoryService' });
     await inventoryApp.init();
     await inventoryApp.listen(0);
     inventoryUrl = await inventoryApp.getUrl();
@@ -37,7 +37,7 @@ describe('Order ↔ Inventory integration (e2e)', () => {
       imports: [AppModule],
     }).compile();
     orderApp = orderModule.createNestApplication();
-    setupHttp(orderApp);
+    setupHttp(orderApp, { serviceName: 'OrderService' });
     await orderApp.init();
 
     const inventoryDb = inventoryApp.get(InventoryDatabaseService);
@@ -105,7 +105,7 @@ describe('Order ↔ Inventory integration (e2e)', () => {
       imports: [AppModule],
     }).compile();
     const isolatedApp = isolatedModule.createNestApplication();
-    setupHttp(isolatedApp);
+    setupHttp(isolatedApp, { serviceName: 'OrderService' });
     await isolatedApp.init();
 
     const created = await request(isolatedApp.getHttpServer())
@@ -160,4 +160,98 @@ describe('Order ↔ Inventory integration (e2e)', () => {
 
     expect(stockAfterRetry).toBe(stockAfterFirst);
   });
+
+  it('reconciles PENDING order after inventory becomes available', async () => {
+    process.env.INVENTORY_SERVICE_URL = 'http://127.0.0.1:1';
+
+    const isolatedModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    const isolatedApp = isolatedModule.createNestApplication();
+    setupHttp(isolatedApp, { serviceName: 'OrderService' });
+    await isolatedApp.init();
+
+    const created = await request(isolatedApp.getHttpServer())
+      .post('/orders')
+      .send({ productId, quantity: 1 })
+      .expect(201);
+
+    expect(created.body.status).toBe('PENDING');
+    await isolatedApp.close();
+
+    process.env.INVENTORY_SERVICE_URL = inventoryUrl;
+
+    const reconcileModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    const reconcileApp = reconcileModule.createNestApplication();
+    setupHttp(reconcileApp, { serviceName: 'OrderService' });
+    await reconcileApp.init();
+
+    const reconciled = await request(reconcileApp.getHttpServer())
+      .post(`/orders/${created.body.id}/reconcile`)
+      .expect(201);
+
+    expect(reconciled.body.status).toBe('RESERVED');
+    expect(reconciled.body.reservationId).toEqual(expect.any(String));
+
+    await reconcileApp.close();
+  });
+
+  it('leaves order PENDING when inventory commits but HTTP response is lost to timeout', async () => {
+    const savedProcessingDelay = process.env.RESERVATION_PROCESSING_DELAY_MS;
+    const savedResponseDelay = process.env.RESERVATION_RESPONSE_DELAY_MS;
+    const savedOrderTimeout = process.env.INVENTORY_HTTP_TIMEOUT_MS;
+
+    process.env.RESERVATION_PROCESSING_DELAY_MS = '0';
+    process.env.RESERVATION_RESPONSE_DELAY_MS = '2000';
+    process.env.INVENTORY_HTTP_TIMEOUT_MS = '500';
+
+    const delayedInventoryModule = await Test.createTestingModule({
+      imports: [InventoryServiceModule],
+    }).compile();
+    const delayedInventoryApp = delayedInventoryModule.createNestApplication();
+    setupHttp(delayedInventoryApp, { serviceName: 'InventoryService' });
+    await delayedInventoryApp.init();
+    await delayedInventoryApp.listen(0);
+    const delayedInventoryUrl = await delayedInventoryApp.getUrl();
+
+    process.env.INVENTORY_SERVICE_URL = delayedInventoryUrl;
+
+    const slowClientModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    const slowClientApp = slowClientModule.createNestApplication();
+    setupHttp(slowClientApp, { serviceName: 'OrderService' });
+    await slowClientApp.init();
+
+    const created = await request(slowClientApp.getHttpServer())
+      .post('/orders')
+      .send({ productId, quantity: 1 })
+      .expect(201);
+
+    expect(created.body.status).toBe('PENDING');
+
+    const [reservation] = await delayedInventoryApp
+      .get(InventoryDatabaseService)
+      .db.select()
+      .from(inventoryReservations)
+      .where(eq(inventoryReservations.orderId, created.body.id));
+
+    expect(reservation).toBeDefined();
+
+    const reconciled = await request(orderApp.getHttpServer())
+      .post(`/orders/${created.body.id}/reconcile`)
+      .expect(201);
+
+    expect(reconciled.body.status).toBe('RESERVED');
+
+    await slowClientApp.close();
+    await delayedInventoryApp.close();
+
+    process.env.RESERVATION_PROCESSING_DELAY_MS = savedProcessingDelay;
+    process.env.RESERVATION_RESPONSE_DELAY_MS = savedResponseDelay;
+    process.env.INVENTORY_HTTP_TIMEOUT_MS = savedOrderTimeout;
+    process.env.INVENTORY_SERVICE_URL = inventoryUrl;
+  }, 30_000);
 });

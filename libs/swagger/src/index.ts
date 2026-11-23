@@ -1,0 +1,1 @@
+export { setupSwagger, type SwaggerAppOptions } from './setup-swagger.js';

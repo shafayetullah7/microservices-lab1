@@ -14,7 +14,7 @@ describe('Order service (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    setupHttp(app);
+    setupHttp(app, { serviceName: 'OrderService' });
     await app.init();
   });
 

@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InventoryHttpClient } from '../inventory-client/inventory-http.client.js';
+import {
+  InventoryHttpClient,
+  type InventoryReservationOutcome,
+} from '../inventory-client/inventory-http.client.js';
 import type { CreateOrderDto } from './dto/create-order.dto.js';
+import type { ListOrdersQuery } from './dto/list-orders.query.js';
 import {
   OrderRepository,
   type OrderStatus,
@@ -15,6 +19,18 @@ export type OrderResponse = {
   createdAt: Date;
   updatedAt: Date;
   reservationId?: string;
+};
+
+export type OrderListResponse = {
+  data: OrderResponse[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 };
 
 @Injectable()
@@ -33,6 +49,64 @@ export class OrdersService {
       quantity: dto.quantity,
     });
 
+    return this.applyInventoryOutcome(order, inventory);
+  }
+
+  async reconcileOrder(orderId: string): Promise<OrderResponse> {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) {
+      throw new NotFoundException(`Order ${orderId} was not found`);
+    }
+
+    if (order.status === 'RESERVED' || order.status === 'REJECTED') {
+      return this.toResponse(order);
+    }
+
+    const inventory = await this.inventoryClient.reserveStock({
+      orderId: order.id,
+      productId: order.productId,
+      quantity: order.quantity,
+    });
+
+    return this.applyInventoryOutcome(order, inventory);
+  }
+
+  async listOrders(query: ListOrdersQuery): Promise<OrderListResponse> {
+    const { page, pageSize, sortBy, sortOrder } = query;
+    const { items, totalItems } = await this.orderRepository.findPage(
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+    );
+    const totalPages =
+      totalItems === 0 ? 0 : Math.ceil(totalItems / pageSize);
+
+    return {
+      data: items.map((order) => this.toResponse(order)),
+      pagination: {
+        page,
+        pageSize,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async getOrder(orderId: string): Promise<OrderResponse> {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) {
+      throw new NotFoundException(`Order ${orderId} was not found`);
+    }
+    return this.toResponse(order);
+  }
+
+  private async applyInventoryOutcome(
+    order: OrderWithLine,
+    inventory: InventoryReservationOutcome,
+  ): Promise<OrderResponse> {
     switch (inventory.kind) {
       case 'reserved':
       case 'already_reserved':
@@ -52,14 +126,6 @@ export class OrdersService {
       case 'unavailable':
         return this.toResponse(order);
     }
-  }
-
-  async getOrder(orderId: string): Promise<OrderResponse> {
-    const order = await this.orderRepository.findById(orderId);
-    if (!order) {
-      throw new NotFoundException(`Order ${orderId} was not found`);
-    }
-    return this.toResponse(order);
   }
 
   private toResponse(

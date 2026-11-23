@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { asc, count, desc, eq } from 'drizzle-orm';
+import type {
+  ListOrdersSortBy,
+  ListOrdersSortOrder,
+} from './dto/list-orders.query.js';
 import { DatabaseService } from '../database/database.service.js';
 import * as schema from '../database/schema/index.js';
 
@@ -19,6 +23,11 @@ export type OrderWithLine = {
   quantity: number;
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type OrderPage = {
+  items: OrderWithLine[];
+  totalItems: number;
 };
 
 @Injectable()
@@ -59,6 +68,49 @@ export class OrderRepository {
       .update(orders)
       .set({ status, updatedAt: new Date() })
       .where(eq(orders.id, orderId));
+  }
+
+  async findPage(
+    page: number,
+    pageSize: number,
+    sortBy: ListOrdersSortBy,
+    sortOrder: ListOrdersSortOrder,
+  ): Promise<OrderPage> {
+    const offset = (page - 1) * pageSize;
+    const sortColumn =
+      sortBy === 'updatedAt' ? orders.updatedAt : orders.createdAt;
+    const direction = sortOrder === 'asc' ? asc : desc;
+
+    const [{ totalItems }] = await this.database.db
+      .select({ totalItems: count() })
+      .from(orders);
+
+    const rows = await this.database.db
+      .select({
+        id: orders.id,
+        status: orders.status,
+        productId: orderItems.productId,
+        quantity: orderItems.quantity,
+        createdAt: orders.createdAt,
+        updatedAt: orders.updatedAt,
+      })
+      .from(orders)
+      .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .orderBy(direction(sortColumn), desc(orders.id))
+      .limit(pageSize)
+      .offset(offset);
+
+    return {
+      totalItems,
+      items: rows.map((row) => ({
+        id: row.id,
+        status: row.status as OrderStatus,
+        productId: row.productId,
+        quantity: row.quantity,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      })),
+    };
   }
 
   async findById(orderId: string): Promise<OrderWithLine | null> {

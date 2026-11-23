@@ -14,7 +14,7 @@ describe('Inventory service (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    setupHttp(app);
+    setupHttp(app, { serviceName: 'InventoryService' });
     await app.init();
   });
 

@@ -30,6 +30,26 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return;
     }
 
+    const cause =
+      typeof exception === 'object' && exception !== null && 'cause' in exception
+        ? (exception as { cause: unknown }).cause
+        : undefined;
+    if (cause instanceof Error) {
+      this.logger.error(`Unhandled error cause: ${cause.message}`);
+    } else if (
+      typeof cause === 'object' &&
+      cause !== null &&
+      'message' in cause &&
+      typeof (cause as { message: unknown }).message === 'string'
+    ) {
+      const pg = cause as { message: string; code?: string; detail?: string };
+      this.logger.error(
+        `Unhandled error cause [${pg.code ?? 'db'}]: ${pg.message}${
+          pg.detail ? ` (${pg.detail})` : ''
+        }`,
+      );
+    }
+
     this.logger.error(
       'Unhandled error',
       exception instanceof Error ? exception.stack : String(exception),
