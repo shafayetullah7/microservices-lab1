@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { OrderCreatedPublisher } from '../../../../libs/messaging/src/index.js';
 import { InventoryHttpClient } from '../inventory-client/inventory-http.client.js';
 import { OrderRepository } from './order.repository.js';
 import { OrdersService } from './orders.service.js';
@@ -24,12 +25,14 @@ describe('OrdersService', () => {
         reservationId: '22222222-2222-4222-8222-222222222222',
       }),
     };
+    const orderCreatedPublisher = { publish: vi.fn().mockResolvedValue(undefined) };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
         OrdersService,
         { provide: OrderRepository, useValue: orderRepository },
         { provide: InventoryHttpClient, useValue: inventoryClient },
+        { provide: OrderCreatedPublisher, useValue: orderCreatedPublisher },
       ],
     }).compile();
 
@@ -43,6 +46,13 @@ describe('OrdersService', () => {
     expect(orderRepository.updateStatus).toHaveBeenCalledWith(
       '11111111-1111-4111-8111-111111111111',
       'RESERVED',
+    );
+    expect(orderCreatedPublisher.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'order.created',
+        orderId: '11111111-1111-4111-8111-111111111111',
+        status: 'PENDING',
+      }),
     );
   });
 
@@ -76,6 +86,10 @@ describe('OrdersService', () => {
           OrdersService,
           { provide: OrderRepository, useValue: orderRepository },
           { provide: InventoryHttpClient, useValue: inventoryClient },
+          {
+            provide: OrderCreatedPublisher,
+            useValue: { publish: vi.fn() },
+          },
         ],
       }).compile()
     ).get(OrdersService);
@@ -108,6 +122,10 @@ describe('OrdersService', () => {
           OrdersService,
           { provide: OrderRepository, useValue: orderRepository },
           { provide: InventoryHttpClient, useValue: inventoryClient },
+          {
+            provide: OrderCreatedPublisher,
+            useValue: { publish: vi.fn() },
+          },
         ],
       }).compile()
     ).get(OrdersService);

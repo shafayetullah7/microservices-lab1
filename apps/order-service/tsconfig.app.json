@@ -11,7 +11,8 @@
     "../../libs/database-health/src/**/*",
     "../../libs/database-readiness/src/**/*",
     "../../libs/http/src/**/*",
-    "../../libs/swagger/src/**/*"
+    "../../libs/swagger/src/**/*",
+    "../../libs/messaging/src/**/*"
   ],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }

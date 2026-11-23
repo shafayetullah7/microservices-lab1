@@ -27,6 +27,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/order-service/tsconfig.app.json"
       }
+    },
+    "event-consumer": {
+      "type": "application",
+      "root": "apps/event-consumer",
+      "entryFile": "main",
+      "sourceRoot": "apps/event-consumer/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/event-consumer/tsconfig.app.json"
+      }
     }
   }
 }

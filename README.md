@@ -25,9 +25,11 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-**Lab docs:** [Day 3 Step 5 — distributed failure experiments](docs/day3-step5-distributed-failures.md) (HTTP timeouts, PENDING orders, reconcile).
+**Lab docs:** [Day 3 Step 5 — distributed failure experiments](docs/day3-step5-distributed-failures.md) (HTTP timeouts, PENDING orders, reconcile). [Day 4 Step 1 — RabbitMQ](docs/day4-step1-rabbitmq.md) (`order.created` publish + consumer).
 
 **Swagger UI** (after `pnpm start:inventory` / `pnpm start:order`): Inventory [http://127.0.0.1:3000/api](http://127.0.0.1:3000/api), Order [http://127.0.0.1:3001/api](http://127.0.0.1:3001/api). OpenAPI JSON at `/api-json`. Set `SWAGGER_ENABLED=false` to disable.
+
+**RabbitMQ:** `pnpm db:up` includes the broker (AMQP `127.0.0.1:5672`, UI http://127.0.0.1:15672). Run `pnpm start:consumer:dev` alongside order/inventory to log `order.created` events.
 
 ## Project setup
 

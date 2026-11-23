@@ -7,6 +7,10 @@ import {
   orderEnvSchema,
   type OrderEnv,
 } from '../../../libs/app-env/src/index.js';
+import {
+  RabbitMqMessagingModule,
+  RabbitMqReadinessModule,
+} from '../../../libs/messaging/src/index.js';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { HealthModule } from '../../../libs/database-health/src/index.js';
 import { DatabaseReadinessModule } from '../../../libs/database-readiness/src/index.js';
@@ -23,6 +27,24 @@ import { OrdersModule } from './orders/orders.module.js';
       useFactory: (appEnv: AppEnvService<OrderEnv>) => ({
         connectionString: appEnv.get('ORDER_DATABASE_URL'),
         label: 'order database',
+      }),
+    }),
+    RabbitMqReadinessModule.forRootAsync({
+      inject: [AppEnvService],
+      useFactory: (appEnv: AppEnvService<OrderEnv>) => ({
+        enabled: appEnv.get('RABBITMQ_ENABLED'),
+        url: appEnv.get('RABBITMQ_URL'),
+        label: 'RabbitMQ',
+      }),
+    }),
+    RabbitMqMessagingModule.forRootAsync({
+      inject: [AppEnvService],
+      useFactory: (appEnv: AppEnvService<OrderEnv>) => ({
+        enabled: appEnv.get('RABBITMQ_ENABLED'),
+        url: appEnv.get('RABBITMQ_URL'),
+        exchange: appEnv.get('ORDER_EVENTS_EXCHANGE'),
+        routingKey: appEnv.get('ORDER_CREATED_ROUTING_KEY'),
+        queue: appEnv.get('ORDER_CREATED_QUEUE'),
       }),
     }),
     DrizzleModule.forRootAsync({

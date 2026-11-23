@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "rootDir": "../..",
+    "outDir": "../../dist/apps/event-consumer"
+  },
+  "include": [
+    "src/**/*",
+    "../../libs/app-env/src/**/*",
+    "../../libs/messaging/src/**/*"
+  ],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+}

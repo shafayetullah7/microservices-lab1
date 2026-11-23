@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { OrderCreatedPublisher } from '../../../../libs/messaging/src/index.js';
 import {
   InventoryHttpClient,
   type InventoryReservationOutcome,
@@ -35,13 +36,30 @@ export type OrderListResponse = {
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly inventoryClient: InventoryHttpClient,
+    private readonly orderCreatedPublisher: OrderCreatedPublisher,
   ) {}
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
     const order = await this.orderRepository.createOrder(dto);
+
+    try {
+      await this.orderCreatedPublisher.publish({
+        eventType: 'order.created',
+        orderId: order.id,
+        productId: dto.productId,
+        quantity: dto.quantity,
+        status: order.status,
+        occurredAt: order.createdAt.toISOString(),
+      });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to publish order.created: ${detail}`);
+    }
 
     const inventory = await this.inventoryClient.reserveStock({
       orderId: order.id,

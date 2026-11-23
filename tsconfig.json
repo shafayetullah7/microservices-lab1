@@ -32,6 +32,9 @@
       "path": "./apps/inventory-service/tsconfig.app.json"
     },
     {
+      "path": "./apps/event-consumer/tsconfig.app.json"
+    },
+    {
       "path": "./tsconfig.spec.json"
     }
   ]

@@ -1,0 +1,1 @@
+process.env.RABBITMQ_ENABLED = 'false';
