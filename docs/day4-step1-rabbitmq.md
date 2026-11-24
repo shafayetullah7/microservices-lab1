@@ -2,6 +2,8 @@
 
 Asynchronous messaging alongside the existing **HTTP inventory reservation** flow (unchanged).
 
+**Code walkthrough:** [day4-rabbitmq-wiring-guide.md](./day4-rabbitmq-wiring-guide.md)
+
 ## Terminology
 
 | Term | In this lab |
