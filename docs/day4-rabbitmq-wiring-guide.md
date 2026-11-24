@@ -47,7 +47,7 @@ Publish runs **after** the order row is written, **before** the inventory HTTP c
 | [`.env.example`](../.env.example) | `RABBITMQ_URL`, exchange/queue/key names, `RABBITMQ_ENABLED` |
 | [`libs/app-env/src/schemas/messaging.env.schema.ts`](../libs/app-env/src/schemas/messaging.env.schema.ts) | Zod env validation |
 | [`libs/app-env/src/schemas/order.env.schema.ts`](../libs/app-env/src/schemas/order.env.schema.ts) | Order app env = DB + HTTP + messaging |
-| [`libs/app-env/src/schemas/consumer.env.schema.ts`](../libs/app-env/src/schemas/consumer.env.schema.ts) | Consumer app env = messaging only |
+| [`libs/app-env/src/schemas/consumer.env.schema.ts`](../libs/app-env/src/schemas/consumer.env.schema.ts) | Messaging + Step 2 knobs (`RABBITMQ_CONSUMER_PREFETCH`, delay, nack requeue) |
 
 Config flow: `process.env` → `AppEnvModule` → `useFactory` → `RabbitMqMessagingOptions`.
 
@@ -101,7 +101,7 @@ Dependency: **`amqplib`** (root `package.json`).
 |------|---------|
 | [`apps/event-consumer/src/main.ts`](../apps/event-consumer/src/main.ts) | `NestFactory.createApplicationContext` (no HTTP server) |
 | [`apps/event-consumer/src/app.module.ts`](../apps/event-consumer/src/app.module.ts) | Same messaging modules as order service |
-| [`apps/event-consumer/src/order-created.consumer.ts`](../apps/event-consumer/src/order-created.consumer.ts) | `consume` → Zod parse → log → `ack` |
+| [`apps/event-consumer/src/order-created.consumer.ts`](../apps/event-consumer/src/order-created.consumer.ts) | `prefetch` → `consume` → parse → optional delay → `ack` / `nack` (see [Step 2 doc](./day4-step2-delivery-guarantees.md)) |
 
 ### 8. Monorepo tooling
 
@@ -144,6 +144,9 @@ pnpm start:order          # terminal 3
 | `ORDER_EVENTS_EXCHANGE` | `orders.events` | Order + consumer |
 | `ORDER_CREATED_ROUTING_KEY` | `order.created` | Order + consumer |
 | `ORDER_CREATED_QUEUE` | `order.created.log` | Order (assert) + consumer (consume) |
+| `RABBITMQ_CONSUMER_PREFETCH` | `1` | Consumer only — prefetch |
+| `CONSUMER_PROCESSING_DELAY_MS` | `0` | Consumer only — lab delay before ack |
+| `CONSUMER_INVALID_NACK_REQUEUE` | `false` | Consumer only — requeue invalid messages |
 
 ## Troubleshooting
 

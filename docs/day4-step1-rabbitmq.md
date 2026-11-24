@@ -50,6 +50,10 @@ See `.env.example`: `RABBITMQ_URL`, `ORDER_EVENTS_EXCHANGE`, `ORDER_CREATED_ROUT
 | Messages piling up in queue | Consumer stopped; start `pnpm start:consumer:dev` |
 | Orders still work when broker down | By design — publish errors are non-fatal |
 
+## Next step
+
+**[Day 4 Step 2 — Acknowledgments and delivery guarantees](./day4-step2-delivery-guarantees.md)** (ack/nack, prefetch, failure experiments, Management UI).
+
 ## Out of scope (Step 1)
 
 - Replacing HTTP reservations with message-driven inventory

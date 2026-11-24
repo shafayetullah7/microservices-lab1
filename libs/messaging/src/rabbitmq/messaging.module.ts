@@ -38,7 +38,11 @@ export class RabbitMqMessagingModule {
         RabbitMqConnectionService,
         OrderCreatedPublisher,
       ],
-      exports: [OrderCreatedPublisher, RabbitMqConnectionService],
+      exports: [
+        RABBITMQ_MESSAGING_OPTIONS,
+        OrderCreatedPublisher,
+        RabbitMqConnectionService,
+      ],
     };
   }
 }

@@ -17,6 +17,9 @@ import {
 } from '../../../libs/messaging/src/index.js';
 import type { ConsumeMessage } from 'amqplib';
 
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 @Injectable()
 export class OrderCreatedConsumer
   implements OnModuleInit, OnModuleDestroy
@@ -39,31 +42,49 @@ export class OrderCreatedConsumer
 
     const channel = this.rabbitMq.getChannel();
     const queue = this.appEnv.get('ORDER_CREATED_QUEUE');
+    const prefetch = this.appEnv.get('RABBITMQ_CONSUMER_PREFETCH');
+    await channel.prefetch(prefetch);
     const { consumerTag } = await channel.consume(
       queue,
-      (message) => this.handleMessage(message),
+      (message) => {
+        void this.handleMessage(message);
+      },
       { noAck: false },
     );
     this.consumerTag = consumerTag;
-    this.logger.log(`Consuming ${queue} (order.created events)`);
+    this.logger.log(
+      `Consuming ${queue} (order.created events, prefetch=${prefetch})`,
+    );
   }
 
-  private handleMessage(message: ConsumeMessage | null): void {
+  private async handleMessage(message: ConsumeMessage | null): Promise<void> {
     if (!message) {
       return;
     }
     const channel = this.rabbitMq.getChannel();
+    const nackRequeue = this.appEnv.get('CONSUMER_INVALID_NACK_REQUEUE');
     try {
       const raw: unknown = JSON.parse(message.content.toString('utf8'));
       const event = orderCreatedEventSchema.parse(raw);
+      const redelivered = message.fields.redelivered;
+      const delayMs = this.appEnv.get('CONSUMER_PROCESSING_DELAY_MS');
+      if (delayMs > 0) {
+        await sleep(delayMs);
+      }
       this.logger.log(
-        `order.created orderId=${event.orderId} productId=${event.productId} quantity=${event.quantity} status=${event.status}`,
+        redelivered
+          ? `order.created redelivered=true orderId=${event.orderId} productId=${event.productId} quantity=${event.quantity} status=${event.status}`
+          : `order.created orderId=${event.orderId} productId=${event.productId} quantity=${event.quantity} status=${event.status}`,
       );
       channel.ack(message);
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Invalid message; nacking without requeue: ${detail}`);
-      channel.nack(message, false, false);
+      this.logger.error(
+        nackRequeue
+          ? `Invalid message; nacking with requeue: ${detail}`
+          : `Invalid message; nacking without requeue: ${detail}`,
+      );
+      channel.nack(message, false, nackRequeue);
     }
   }
 
